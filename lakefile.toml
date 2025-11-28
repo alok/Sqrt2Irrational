@@ -22,3 +22,10 @@ rev = "v4.25.1"
 
 [[lean_lib]]
 name = "Sqrt2Irrational"
+
+[[lean_lib]]
+name = "Sqrt2Docs"
+
+[[lean_exe]]
+name = "sqrt2docs"
+root = "Sqrt2DocsMain"
