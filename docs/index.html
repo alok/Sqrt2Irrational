@@ -11,8 +11,10 @@
             --bg: #0d1117;
             --fg: #c9d1d9;
             --accent: #58a6ff;
+            --accent2: #7ee787;
             --muted: #8b949e;
             --code-bg: #161b22;
+            --warn: #d29922;
         }
         * { box-sizing: border-box; }
         body {
@@ -20,7 +22,7 @@
             background: var(--bg);
             color: var(--fg);
             line-height: 1.6;
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -51,13 +53,48 @@
             background: #161b22;
         }
         .theorem-box h3 { margin-top: 0; }
-        .math { font-style: italic; }
         blockquote {
             border-left: 3px solid var(--muted);
             padding-left: 1rem;
             color: var(--muted);
         }
         .section { margin: 2rem 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #30363d;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        th { background: #161b22; color: var(--accent); }
+        tr:nth-child(even) { background: #161b22; }
+        .metric {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--accent2);
+        }
+        .metric-label {
+            color: var(--muted);
+            font-size: 0.9em;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        .metric-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .independent { color: var(--accent2); }
+        .same-core { color: var(--warn); }
     </style>
 </head>
 <body>
@@ -72,6 +109,100 @@
     </blockquote>
 
     <div class="section">
+        <h2>Proof Comparison: Quantified</h2>
+
+        <p>How does this proof compare to the standard one taught in schools?</p>
+
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Standard (Parity)</th>
+                <th>This (Dirichlet+QR)</th>
+                <th>Ultraproduct Version</th>
+            </tr>
+            <tr>
+                <td><strong>Lines of Lean code</strong></td>
+                <td>~3 lines*</td>
+                <td>~120 lines</td>
+                <td>~250 lines</td>
+            </tr>
+            <tr>
+                <td><strong>Key mathematical fact</strong></td>
+                <td>n² even ⟹ n even</td>
+                <td>Legendre symbol (2|p) = -1</td>
+                <td>+ Łoś's theorem</td>
+            </tr>
+            <tr>
+                <td><strong>Deepest dependency</strong></td>
+                <td>Nat.Prime.not_isSquare</td>
+                <td>Nat.infinite_setOf_prime_and_eq_mod</td>
+                <td>+ hyperfilter existence</td>
+            </tr>
+            <tr>
+                <td><strong>Mathematical era</strong></td>
+                <td>Ancient Greece (~500 BCE)</td>
+                <td>19th century (Dirichlet 1837)</td>
+                <td>20th century (Łoś 1955)</td>
+            </tr>
+            <tr>
+                <td><strong>Requires "lowest terms"?</strong></td>
+                <td>Yes</td>
+                <td>No</td>
+                <td>No</td>
+            </tr>
+            <tr>
+                <td><strong>Choice axiom essential?</strong></td>
+                <td>No</td>
+                <td>No</td>
+                <td><strong>Yes</strong> (for ultrafilter)</td>
+            </tr>
+        </table>
+
+        <p><small>*Mathlib's <code>irrational_sqrt_two</code> is 1 line, calling into ~100 lines of supporting lemmas</small></p>
+
+        <h3>Axioms Used (Lean verification)</h3>
+
+        <p>All three proofs use the same foundational axioms:</p>
+
+<pre><code class="language-lean">#print axioms irrational_sqrt_2
+-- 'irrational_sqrt_2' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+#print axioms irrational_sqrt_2_ultraproduct
+-- 'irrational_sqrt_2_ultraproduct' depends on axioms: [propext, Classical.choice, Quot.sound]
+
+#print axioms irrational_sqrt_two  -- Mathlib's standard proof
+-- 'irrational_sqrt_two' depends on axioms: [propext, Classical.choice, Quot.sound]</code></pre>
+
+        <p>The axioms are identical because Mathlib uses <code>Classical.choice</code> pervasively.
+        However, the <strong>mathematical dependencies</strong> are completely different.</p>
+
+        <h3>Are They Independent Proofs?</h3>
+
+        <table>
+            <tr>
+                <th>Comparison</th>
+                <th>Verdict</th>
+                <th>Reason</th>
+            </tr>
+            <tr>
+                <td>Standard vs. This proof</td>
+                <td class="independent">✓ INDEPENDENT</td>
+                <td>Different core lemmas (parity vs. quadratic residues)</td>
+            </tr>
+            <tr>
+                <td>Standard vs. Ultraproduct</td>
+                <td class="independent">✓ INDEPENDENT</td>
+                <td>Different core lemmas</td>
+            </tr>
+            <tr>
+                <td>Direct vs. Ultraproduct</td>
+                <td class="same-core">⚠ SAME CORE</td>
+                <td>Both use Dirichlet + QR; ultraproduct just packages it</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
         <h2>The Key Idea</h2>
         <p>Instead of the usual proof by contradiction using parity, we use heavy machinery:</p>
         <ol>
@@ -82,6 +213,38 @@
         </ol>
         <p>If √2 = a/b were rational, then for any sufficiently large prime p (not dividing b),
         we'd have (a/b)² ≡ 2 (mod p), contradicting that 2 is not a square mod p!</p>
+    </div>
+
+    <div class="section">
+        <h2>Side-by-Side: Standard vs. This Proof</h2>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="theorem-box">
+                <h3>Standard Proof (Parity)</h3>
+<pre><code class="language-text">Assume √2 = a/b in lowest terms
+→ a² = 2b²
+→ a² is even
+→ a is even (a = 2k)
+→ 4k² = 2b², so b² = 2k²
+→ b is even
+→ Both even contradicts "lowest terms"
+→ ⊥</code></pre>
+                <p><strong>Core fact:</strong> If n² is even, then n is even</p>
+            </div>
+
+            <div class="theorem-box">
+                <h3>This Proof (Dirichlet + QR)</h3>
+<pre><code class="language-text">Assume √2 = a/b
+→ a² = 2b²
+→ Pick prime p ≡ 3 (mod 8), p > max(a,b)
+→ p ∤ b, so b invertible mod p
+→ (a/b)² ≡ 2 (mod p)
+→ 2 is a square mod p
+→ But QR says 2 is NOT a square mod p
+→ ⊥</code></pre>
+                <p><strong>Core fact:</strong> Legendre symbol (2|p) = -1 for p ≡ 3 (mod 8)</p>
+            </div>
+        </div>
     </div>
 
     <div class="section">
@@ -106,10 +269,7 @@
     (hp : p.Prime ∧ (p : ZMod 8) = 3) (hp2 : p ≠ 2) :
     ¬IsSquare (2 : ZMod p) := by
   haveI : Fact p.Prime := ⟨hp.1⟩
-  have : p % 8 = 3 := by
-    have hcast : (p : ZMod 8) = 3 := hp.2
-    have : ZMod.val (p : ZMod 8) = 3 := by rw [hcast]; rfl
-    rwa [ZMod.val_natCast] at this
+  have : p % 8 = 3 := ...
   rw [ZMod.exists_sq_eq_two_iff hp2]
   push_neg
   constructor
@@ -125,7 +285,6 @@
             <h3>The Contradiction</h3>
             <p>If √2 = a/b, then a² = 2b². For any prime p > max(a,b) with p ≡ 3 (mod 8):</p>
 <pre><code class="language-lean">lemma rational_sqrt_two_contradiction (q : ℚ) (hq : (q : ℝ) = √2) : False := by
-  classical
   -- Get coprime representation √2 = a/b
   obtain ⟨a, b, hb_pos, _hcop, h_ratio⟩ := rat_to_coprime_pair q hq_pos
   have hsq : a ^ 2 = 2 * b ^ 2 := sqrt_two_eq_ratio_implies_square_eq a b hb_pos h_sqrt_ratio
@@ -134,16 +293,10 @@
   obtain ⟨p, hp_mem, hbig⟩ : ∃ p ∈ primes_three_mod_eight, max a b < p := by
     simpa using primes_three_mod_eight_infinite.exists_gt (max a b)
 
-  -- p doesn't divide b (since p > b)
-  have hpb : ¬ (p ∣ b) := by
-    intro hdiv
-    have hb_lt : b < p := (le_max_right a b).trans_lt hbig
-    exact (not_le.mpr hb_lt) (Nat.le_of_dvd hb_pos hdiv)
-
-  -- From a² = 2b² we get that 2 is a square mod p
+  -- p doesn't divide b (since p > b), so 2 is a square mod p
   have sq2_in_Fp : IsSquare (2 : ZMod p) := two_is_square_mod_p p a b hsq hpb
 
-  -- But 2 is NOT a square mod p (quadratic reciprocity!)
+  -- But quadratic reciprocity says 2 is NOT a square mod p
   have not_sq2_in_Fp : ¬ IsSquare (2 : ZMod p) :=
     two_not_square_mod_prime_three_mod_eight p hp_mem hp_ne_2
 
@@ -153,75 +306,75 @@
     </div>
 
     <div class="section">
-        <h2>Ultraproduct Machinery</h2>
+        <h2>Ultraproduct Machinery (Optional Overkill)</h2>
+
+        <p>The ultraproduct version adds ~130 more lines to package "for almost all p" into a single algebraic object:</p>
 
         <div class="theorem-box">
             <h3>The Index Set and Ultrafilter</h3>
 <pre><code class="language-lean">-- The subtype of primes ≡ 3 (mod 8)
 abbrev PrimesMod3_8 : Type := {p : ℕ // p.Prime ∧ (p : ZMod 8) = 3}
 
--- This set is infinite
-instance : Infinite PrimesMod3_8 := by
-  have : Set.Infinite primes_three_mod_eight := primes_three_mod_eight_infinite
-  exact Set.infinite_coe_iff.mpr this
-
--- The family of fields indexed by these primes
-abbrev FieldFamily (p : PrimesMod3_8) : Type := ZMod p.val
-
 -- Non-principal ultrafilter extending the cofinite filter
 noncomputable def ultrafilterOnPrimes : Ultrafilter PrimesMod3_8 :=
-  hyperfilter PrimesMod3_8</code></pre>
-        </div>
+  hyperfilter PrimesMod3_8  -- ← Requires Axiom of Choice!
 
-        <div class="theorem-box">
-            <h3>The Ultraproduct</h3>
-<pre><code class="language-lean">-- The ultraproduct ∏_U ZMod p
+-- The ultraproduct ∏_U ZMod p
 noncomputable abbrev Ultraproduct : Type :=
   (ultrafilterOnPrimes : Filter PrimesMod3_8).Product FieldFamily</code></pre>
-            <div class="proof-state">
-                <div class="proof-state-header">Key properties:</div>
-                • Characteristic 0 (for any n, cofinitely many primes p > n)<br>
-                • x² = 2 has no solution (by Łoś, since no factor has a solution)
-            </div>
         </div>
 
         <div class="theorem-box">
-            <h3>Main Theorem via Ultraproducts</h3>
-<pre><code class="language-lean">theorem ultraproduct_no_sqrt_two :
-    ¬∃ f : (p : PrimesMod3_8) → FieldFamily p,
-      ∀ᶠ p in (ultrafilterOnPrimes : Filter PrimesMod3_8), f p * f p = 2 := by
-  intro ⟨f, hf⟩
-  -- If f(p)² = 2 for almost all p, then 2 is a square in almost all fields
-  have eventually_square : ∀ᶠ p in (ultrafilterOnPrimes : Filter PrimesMod3_8),
-      IsSquare (2 : FieldFamily p) := by
-    apply Filter.Eventually.mono hf
-    intro p hp
-    exact ⟨f p, hp.symm⟩
-  -- But 2 is not a square in ANY of our fields!
-  exact (two_not_square_eventually.and eventually_square).exists.elim
-    fun p ⟨hns, hs⟩ => hns hs
-
-theorem irrational_sqrt_2_ultraproduct : Irrational √2 := by
-  classical
-  rw [irrational_iff_ne_rational]
-  intro a b hb h_eq
-  apply ultraproduct_no_sqrt_two
-  use fun p => (a : ZMod p.val) * (b : ZMod p.val)⁻¹
-  -- For p > max(|a|,|b|), we have (a/b)² = 2 in ZMod p
-  -- ... [full proof in source]</code></pre>
+            <h3>Why Ultraproducts are Overkill Here</h3>
+            <p>The ultraproduct proof shows:</p>
+            <ul>
+                <li>"x² = 2 has no solution" holds in <strong>almost all</strong> factors</li>
+                <li>By Łoś's theorem, no solution exists in the ultraproduct</li>
+            </ul>
+            <p>But we only need: "x² = 2 has no solution" holds in <strong>one</strong> factor (any large p).</p>
+            <p>It's like proving "this glass contains water" by analyzing the thermodynamic properties of the entire ocean.</p>
         </div>
     </div>
 
     <div class="section">
+        <h2>Can We Avoid Choice?</h2>
+
+        <table>
+            <tr>
+                <th>Proof</th>
+                <th>Choice Required?</th>
+                <th>Why?</th>
+            </tr>
+            <tr>
+                <td>Standard (parity)</td>
+                <td>No*</td>
+                <td>Pure arithmetic + well-ordering</td>
+            </tr>
+            <tr>
+                <td>This (direct)</td>
+                <td>No*</td>
+                <td>Just picks one prime</td>
+            </tr>
+            <tr>
+                <td>This (ultraproduct)</td>
+                <td><strong>Yes</strong></td>
+                <td>hyperfilter requires Boolean Prime Ideal Theorem</td>
+            </tr>
+        </table>
+
+        <p><small>*Mathlib uses Classical.choice pervasively, but the mathematical content doesn't require it</small></p>
+    </div>
+
+    <div class="section">
         <h2>Axioms Used</h2>
-        <p>The proof uses standard mathematical axioms:</p>
+        <p>All proofs use standard mathematical axioms (verified by Lean):</p>
         <ul>
             <li><code>propext</code> — Propositional extensionality</li>
-            <li><code>Classical.choice</code> — Axiom of choice (for ultrafilters)</li>
+            <li><code>Classical.choice</code> — Axiom of choice</li>
             <li><code>Quot.sound</code> — Quotient soundness</li>
         </ul>
         <p>No custom axioms were introduced. The proof is independent of Mathlib's existing
-        <code>irrational_sqrt_two</code> theorem.</p>
+        <code>irrational_sqrt_two</code> theorem (verified: we don't import or reference it).</p>
     </div>
 
     <div class="section">

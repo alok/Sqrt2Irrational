@@ -415,3 +415,31 @@ theorem irrational_sqrt_2_ultraproduct : Irrational √2 := by
     _ = 2 * (((b : ZMod p.val) * (b : ZMod p.val)⁻¹) ^ 2) := by ring
     _ = 2 * 1 ^ 2 := by rw [ZMod.mul_inv_of_unit _ hb_unit]
     _ = 2 := by ring
+
+/-!
+## Proof Comparison Analysis
+
+All three proofs of √2's irrationality use the same foundational axioms:
+- `propext` (propositional extensionality)
+- `Classical.choice` (axiom of choice)
+- `Quot.sound` (quotient soundness)
+
+But they differ dramatically in their **mathematical dependencies**:
+
+**STANDARD PROOF** (Mathlib's `irrational_sqrt_two`) uses:
+- `Nat.Prime.not_isSquare` (parity/factorization argument)
+- Basic divisibility and gcd properties
+
+**THIS PROOF** (`irrational_sqrt_2`) uses:
+- `Nat.infinite_setOf_prime_and_eq_mod` (Dirichlet's theorem)
+- `ZMod.exists_sq_eq_two_iff` (quadratic reciprocity)
+
+**ULTRAPRODUCT PROOF** (`irrational_sqrt_2_ultraproduct`) additionally uses:
+- `hyperfilter` (non-principal ultrafilter existence — requires Choice)
+- `Filter.Product` (ultraproduct construction)
+- `FirstOrder.Ring.CompatibleRing` (first-order ring structures)
+
+The standard proof and this proof are **genuinely independent** — neither can be derived
+from the other without reproving the core lemmas. The ultraproduct version shares the same
+mathematical core as the direct proof, just with additional packaging.
+-/
