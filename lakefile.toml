@@ -14,5 +14,10 @@ doc.verso = true
 name = "mathlib"
 scope = "leanprover-community"
 
+[[require]]
+name = "verso"
+git = "https://github.com/leanprover/verso.git"
+rev = "v4.26.0-rc2"
+
 [[lean_lib]]
 name = "Sqrt2Irrational"

@@ -1,4 +1,11 @@
-import Mathlib
+-- Selective imports for Verso compatibility (avoids needing Mathlib.olean)
+import Mathlib.NumberTheory.LSeries.PrimesInAP          -- Dirichlet's theorem
+import Mathlib.NumberTheory.LegendreSymbol.QuadraticReciprocity  -- Quadratic reciprocity
+import Mathlib.Order.Filter.Ultrafilter.Basic           -- Hyperfilter
+import Mathlib.Order.Filter.FilterProduct               -- Filter.Product (ultraproducts)
+import Mathlib.ModelTheory.Algebra.Ring.Basic           -- First-order ring structures
+import Mathlib.ModelTheory.Ultraproducts                -- Model-theoretic ultraproducts
+import Mathlib.NumberTheory.Real.Irrational             -- Irrational numbers
 
 /--
 {given}`p`
