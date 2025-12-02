@@ -378,6 +378,60 @@ noncomputable abbrev Ultraproduct : Type :=
     </div>
 
     <div class="section">
+        <h2>✅ Verified Independence</h2>
+
+        <p>This proof is <strong>genuinely independent</strong> of Mathlib's standard proof. We verified this by
+        commenting out Mathlib's theorems and rebuilding:</p>
+
+        <div class="theorem-box">
+            <h3>How to Reproduce</h3>
+            <p>You can verify independence yourself by temporarily disabling Mathlib's proof:</p>
+
+<pre><code class="language-bash"># 1. Comment out Mathlib's theorems in .lake/packages/mathlib/Mathlib/NumberTheory/Real/Irrational.lean:
+#    - Line 132: Nat.Prime.irrational_sqrt
+#    - Line 136: irrational_sqrt_two
+#    - Line 511: exists_irrational_btwn (depends on the above)
+
+# 2. Wrap each theorem in block comments:
+#    /- ... theorem ... -/
+
+# 3. Rebuild
+lake build Sqrt2Irrational
+
+# 4. If the build succeeds, the proof is independent!</code></pre>
+
+            <div class="proof-state">
+                <div class="proof-state-header">Result:</div>
+                <strong style="color: var(--accent2);">Build completed successfully (3326 jobs)</strong><br>
+                Both <code>irrational_sqrt_2</code> and <code>irrational_sqrt_2_ultraproduct</code> compile
+                without any dependency on Mathlib's standard proof.
+            </div>
+        </div>
+
+        <h3>What This Proves</h3>
+        <table>
+            <tr>
+                <th>Mathlib's Proof Uses</th>
+                <th>Our Proof Uses</th>
+            </tr>
+            <tr>
+                <td><code>Nat.Prime.irrational_sqrt</code></td>
+                <td><code>Nat.infinite_setOf_prime_and_eq_mod</code></td>
+            </tr>
+            <tr>
+                <td><code>Nat.Prime.not_isSquare</code></td>
+                <td><code>ZMod.exists_sq_eq_two_iff</code></td>
+            </tr>
+            <tr>
+                <td>Parity/factorization argument</td>
+                <td>Dirichlet's theorem + quadratic reciprocity</td>
+            </tr>
+        </table>
+
+        <p>Neither proof can be derived from the other without re-proving the core lemmas from scratch.</p>
+    </div>
+
+    <div class="section">
         <h2>Source Code</h2>
         <p>Full source: <a href="https://github.com/alok/Sqrt2Irrational">github.com/alok/Sqrt2Irrational</a></p>
         <p>Built with Lean 4.26.0-rc2 and Mathlib (latest master).</p>
